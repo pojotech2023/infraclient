@@ -43,6 +43,9 @@ import '../../feature/login/data/repositories/login_repository_impl.dart';
 import '../../feature/login/domain/repositories/login_repository.dart';
 import '../../feature/login/domain/usecase/login_customer.dart';
 import '../../feature/login/presentation/bloc/login_bloc.dart';
+import '../../feature/profile/data/datasources/profile_remote_datasource.dart';
+import '../../feature/profile/data/repositories/profile_repository_impl.dart';
+import '../../feature/profile/domain/repositories/profile_repository.dart';
 
 final getIt = GetIt.I;
 
@@ -176,6 +179,22 @@ getIt.registerFactory<DrawingBloc>(
   );
   getIt.registerFactory<LoginBloc>(
         () => LoginBloc(loginCustomer: getIt<LoginCustomer>()),
+  );
+
+  // ---------------------------
+  // Profile Feature Registrations
+  // ---------------------------
+  getIt.registerLazySingleton<ProfileRemoteDataSource>(
+    () => ProfileRemoteDataSourceImpl(
+      client: getIt<http.Client>(),
+      baseUrl: EnvService.getString('BASE_URL', defaultValue: 'https://api.example.com'),
+    ),
+  );
+  getIt.registerLazySingleton<ProfileRepository>(
+    () => ProfileRepositoryImpl(
+      remoteDataSource: getIt<ProfileRemoteDataSource>(),
+      localStorage: getIt<LocalStorage>(),
+    ),
   );
 
   // ---------------------------

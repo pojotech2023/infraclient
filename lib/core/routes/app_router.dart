@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../feature/dashboard/presentation/pages/dashboard_page.dart';
 import '../../feature/drawing/presentation/pages/drawing_detail_page.dart';
 import '../../feature/profile/presentation/pages/profile_page.dart';
+import '../../feature/profile/presentation/pages/edit_profile_page.dart';
 import '../../feature/tickets/presentation/pages/ticket_chat_page.dart';
 import '../../feature/tickets/presentation/pages/ticket_create_page.dart';
 import '../../feature/theme/presentation/pages/theme_page.dart';
@@ -87,6 +88,13 @@ class AppRouter {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileTabPage(),
+      ),
+      GoRoute(
+        path: '/edit-profile',
+        builder: (context, state) {
+          final userData = state.extra as Map<String, dynamic>;
+          return EditProfilePage(userData: userData);
+        },
       ),
       GoRoute(
         path: '/login',

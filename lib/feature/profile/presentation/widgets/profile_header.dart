@@ -96,134 +96,140 @@ class _ProfileHeaderState extends State<ProfileHeader>
         }
         final String name = user['name'] ?? "Durai";
         final String email = user['email'] ?? "durai@gmail.com";
-       
+        final String? profilePic = user['profile_pic'];
 
+        return SliverAppBar(
+          pinned: true,
+          expandedHeight: 220,
+          backgroundColor: Theme.of(context).primaryColor,
+          flexibleSpace: LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isCollapsed = constraints.maxHeight <= kToolbarHeight + 50;
 
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: 220,
-      backgroundColor: Theme.of(context).primaryColor,
-      flexibleSpace: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool isCollapsed = constraints.maxHeight <= kToolbarHeight + 50;
-
-          return FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+              return FlexibleSpaceBar(
+                titlePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Row(
+                      children: [
+                        if (isCollapsed)
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundImage: (profilePic != null && profilePic.isNotEmpty)
+                                ? NetworkImage(profilePic)
+                                : null,
+                            backgroundColor: Colors.white,
+                            child: (profilePic == null || profilePic.isEmpty)
+                                ? Icon(Icons.person, size: 20, color: Theme.of(context).primaryColor)
+                                : null,
+                          ),
+                        const SizedBox(width: 10),
+                        if (isCollapsed)
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                      ],
+                    ),
                     if (isCollapsed)
-                      const CircleAvatar(
-                        radius: 18,
-                        backgroundImage: NetworkImage(
-                          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-                        ),
-                        backgroundColor: Colors.white,
-                      ),
-                    const SizedBox(width: 10),
-                    if (isCollapsed)
-                       Text(
-                        name,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      IconButton(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Logout tapped')),
+                          );
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.white),
                       ),
                   ],
                 ),
-                if (isCollapsed)
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Logout tapped')),
-                      );
-                    },
-                    icon: const Icon(Icons.logout, color: Colors.white),
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.8),
+                        Theme.of(context).primaryColor,
+                      ],
+                    ),
                   ),
-              ],
-            ),
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).primaryColor.withOpacity(0.8),
-                    Theme.of(context).primaryColor,
-                  ],
-                ),
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: SlideTransition(
+                        position: _slideAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: const CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white24,
+                                  backgroundImage: (profilePic != null && profilePic.isNotEmpty)
+                                      ? NetworkImage(profilePic)
+                                      : null,
+                                  child: (profilePic == null || profilePic.isEmpty)
+                                      ? const Icon(Icons.person, size: 40, color: Colors.white)
+                                      : null,
+                                ),
                               ),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                           Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      email,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                               const SizedBox(height: 5),
-                                Text(
-                                  email,
-                                  style:const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
- 
-      });
  
   }
 }

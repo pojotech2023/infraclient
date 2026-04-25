@@ -125,14 +125,14 @@ class _ProfileContentSectionsState extends State<ProfileContentSections>
         } else if (rawUser is Map) {
           user = Map<String, dynamic>.from(rawUser);
         }
-        final String name = user['name'] ?? "Durai";
-        final String email = user['email'] ?? "durai@gmail.com";
-         final String dob = user['dob'] ?? "durai@gmail.com";
-        final String mobile = user['mobile'] ?? "9876543210";
-        final String address = user['address'] ?? "123, Main Street, Anytown, USA";
-        final String city = user['city'] ?? "Anytown";
-        final String state = user['state'] ?? "CA";
-        final String zip = user['zip'] ?? "12345";
+        final String name = user['name'] ?? "";
+        final String email = user['email'] ?? "";
+         final String dob = user['dob'] ?? "N/A";
+        final String mobile = user['mobile_no'] ?? "N/A";
+        final String address = user['address'] ?? "N/A";
+        final String city = user['city'] ?? "";
+        final String state = user['state'] ?? "";
+        final String zip = user['zip'] ?? "";
 
 
 

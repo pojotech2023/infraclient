@@ -16,6 +16,7 @@ class CustomerEntity with _$CustomerEntity {
     required int isInactive,
     required String createdAt,
     required String updatedAt,
+    String? profilePic,
     String? createdBy,
     String? updatedBy,
   }) = _CustomerEntity;

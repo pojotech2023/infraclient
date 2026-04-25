@@ -1,8 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class ProfileSliverHeader extends StatefulWidget {
-   ProfileSliverHeader({super.key,required this.email,required this.name});
-  String name,email;
+  final String name;
+  final String email;
+  final String? profilePic;
+  final VoidCallback? onPickImage;
+  final VoidCallback? onEditProfile;
+
+  const ProfileSliverHeader({
+    super.key,
+    required this.name,
+    required this.email,
+    this.profilePic,
+    this.onPickImage,
+    this.onEditProfile,
+  });
 
   @override
   State<ProfileSliverHeader> createState() => _ProfileSliverHeaderState();
@@ -41,7 +55,6 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
     // Add a delay to make the animation more visible
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        print('Starting header animation');
         _animationController.forward();
       }
     });
@@ -64,11 +77,10 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
 
   @override
   Widget build(BuildContext context) {
-
     return SliverAppBar(
       pinned: true,
       expandedHeight: 220,
-      backgroundColor:  Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
           final bool isCollapsed = constraints.maxHeight <= kToolbarHeight + 50;
@@ -81,18 +93,21 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                 Row(
                   children: [
                     if (isCollapsed)
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 18,
-                        backgroundImage: NetworkImage(
-                          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-                        ),
+                        backgroundImage: (widget.profilePic != null && widget.profilePic!.isNotEmpty)
+                            ? NetworkImage(widget.profilePic!)
+                            : null,
                         backgroundColor: Colors.white,
+                        child: (widget.profilePic == null || widget.profilePic!.isEmpty)
+                            ? Icon(Icons.person, size: 20, color: Theme.of(context).primaryColor)
+                            : null,
                       ),
                     const SizedBox(width: 10),
                     if (isCollapsed)
-                       Text(
+                      Text(
                         widget.name,
-                        style:const TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -101,13 +116,19 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                   ],
                 ),
                 if (isCollapsed)
-                  IconButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Logout tapped')),
-                      );
-                    },
-                    icon: const Icon(Icons.logout, color: Colors.white),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: widget.onEditProfile,
+                        icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // Logout logic would go here
+                        },
+                        icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -132,28 +153,55 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                          Stack(
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 3),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: const CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.white24,
+                                  backgroundImage: (widget.profilePic != null && widget.profilePic!.isNotEmpty)
+                                      ? NetworkImage(widget.profilePic!)
+                                      : null,
+                                  child: (widget.profilePic == null || widget.profilePic!.isEmpty)
+                                      ? const Icon(Icons.person, size: 40, color: Colors.white)
+                                      : null,
+                                ),
                               ),
-                            ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: widget.onPickImage,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      size: 16,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(width: 20),
-                           Expanded(
+                          Expanded(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,13 +214,25 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              const  SizedBox(height: 5),
-                                Text(
-                                  widget.email,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        widget.email,
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: widget.onEditProfile,
+                                      icon: const Icon(Icons.edit, color: Colors.white70, size: 20),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),

@@ -21,7 +21,9 @@ CustomerModel _$CustomerModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$CustomerModel {
+  @JsonKey(name: 'id')
   int get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'site_id')
   int get siteId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get mobileNo => throw _privateConstructorUsedError;
@@ -32,6 +34,8 @@ mixin _$CustomerModel {
   int get isInactive => throw _privateConstructorUsedError;
   String get createdAt => throw _privateConstructorUsedError;
   String get updatedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'profile_pic')
+  String? get profilePic => throw _privateConstructorUsedError;
   String? get createdBy => throw _privateConstructorUsedError;
   String? get updatedBy => throw _privateConstructorUsedError;
 
@@ -53,8 +57,8 @@ abstract class $CustomerModelCopyWith<$Res> {
   ) = _$CustomerModelCopyWithImpl<$Res, CustomerModel>;
   @useResult
   $Res call({
-    int id,
-    int siteId,
+    @JsonKey(name: 'id') int id,
+    @JsonKey(name: 'site_id') int siteId,
     String name,
     String mobileNo,
     String email,
@@ -64,6 +68,7 @@ abstract class $CustomerModelCopyWith<$Res> {
     int isInactive,
     String createdAt,
     String updatedAt,
+    @JsonKey(name: 'profile_pic') String? profilePic,
     String? createdBy,
     String? updatedBy,
   });
@@ -95,6 +100,7 @@ class _$CustomerModelCopyWithImpl<$Res, $Val extends CustomerModel>
     Object? isInactive = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
   }) {
@@ -155,6 +161,11 @@ class _$CustomerModelCopyWithImpl<$Res, $Val extends CustomerModel>
                     ? _value.updatedAt
                     : updatedAt // ignore: cast_nullable_to_non_nullable
                         as String,
+            profilePic:
+                freezed == profilePic
+                    ? _value.profilePic
+                    : profilePic // ignore: cast_nullable_to_non_nullable
+                        as String?,
             createdBy:
                 freezed == createdBy
                     ? _value.createdBy
@@ -181,8 +192,8 @@ abstract class _$$CustomerModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    int id,
-    int siteId,
+    @JsonKey(name: 'id') int id,
+    @JsonKey(name: 'site_id') int siteId,
     String name,
     String mobileNo,
     String email,
@@ -192,6 +203,7 @@ abstract class _$$CustomerModelImplCopyWith<$Res>
     int isInactive,
     String createdAt,
     String updatedAt,
+    @JsonKey(name: 'profile_pic') String? profilePic,
     String? createdBy,
     String? updatedBy,
   });
@@ -222,6 +234,7 @@ class __$$CustomerModelImplCopyWithImpl<$Res>
     Object? isInactive = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
   }) {
@@ -282,6 +295,11 @@ class __$$CustomerModelImplCopyWithImpl<$Res>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                     as String,
+        profilePic:
+            freezed == profilePic
+                ? _value.profilePic
+                : profilePic // ignore: cast_nullable_to_non_nullable
+                    as String?,
         createdBy:
             freezed == createdBy
                 ? _value.createdBy
@@ -301,8 +319,8 @@ class __$$CustomerModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$CustomerModelImpl extends _CustomerModel {
   const _$CustomerModelImpl({
-    this.id = 0,
-    this.siteId = 0,
+    @JsonKey(name: 'id') this.id = 0,
+    @JsonKey(name: 'site_id') this.siteId = 0,
     this.name = '',
     this.mobileNo = '',
     this.email = '',
@@ -312,6 +330,7 @@ class _$CustomerModelImpl extends _CustomerModel {
     this.isInactive = 0,
     this.createdAt = '',
     this.updatedAt = '',
+    @JsonKey(name: 'profile_pic') this.profilePic,
     this.createdBy,
     this.updatedBy,
   }) : super._();
@@ -320,10 +339,10 @@ class _$CustomerModelImpl extends _CustomerModel {
       _$$CustomerModelImplFromJson(json);
 
   @override
-  @JsonKey()
+  @JsonKey(name: 'id')
   final int id;
   @override
-  @JsonKey()
+  @JsonKey(name: 'site_id')
   final int siteId;
   @override
   @JsonKey()
@@ -353,13 +372,16 @@ class _$CustomerModelImpl extends _CustomerModel {
   @JsonKey()
   final String updatedAt;
   @override
+  @JsonKey(name: 'profile_pic')
+  final String? profilePic;
+  @override
   final String? createdBy;
   @override
   final String? updatedBy;
 
   @override
   String toString() {
-    return 'CustomerModel(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy)';
+    return 'CustomerModel(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, profilePic: $profilePic, createdBy: $createdBy, updatedBy: $updatedBy)';
   }
 
   @override
@@ -383,6 +405,8 @@ class _$CustomerModelImpl extends _CustomerModel {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.profilePic, profilePic) ||
+                other.profilePic == profilePic) &&
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.updatedBy, updatedBy) ||
@@ -404,6 +428,7 @@ class _$CustomerModelImpl extends _CustomerModel {
     isInactive,
     createdAt,
     updatedAt,
+    profilePic,
     createdBy,
     updatedBy,
   );
@@ -424,8 +449,8 @@ class _$CustomerModelImpl extends _CustomerModel {
 
 abstract class _CustomerModel extends CustomerModel {
   const factory _CustomerModel({
-    final int id,
-    final int siteId,
+    @JsonKey(name: 'id') final int id,
+    @JsonKey(name: 'site_id') final int siteId,
     final String name,
     final String mobileNo,
     final String email,
@@ -435,6 +460,7 @@ abstract class _CustomerModel extends CustomerModel {
     final int isInactive,
     final String createdAt,
     final String updatedAt,
+    @JsonKey(name: 'profile_pic') final String? profilePic,
     final String? createdBy,
     final String? updatedBy,
   }) = _$CustomerModelImpl;
@@ -444,8 +470,10 @@ abstract class _CustomerModel extends CustomerModel {
       _$CustomerModelImpl.fromJson;
 
   @override
+  @JsonKey(name: 'id')
   int get id;
   @override
+  @JsonKey(name: 'site_id')
   int get siteId;
   @override
   String get name;
@@ -465,6 +493,9 @@ abstract class _CustomerModel extends CustomerModel {
   String get createdAt;
   @override
   String get updatedAt;
+  @override
+  @JsonKey(name: 'profile_pic')
+  String? get profilePic;
   @override
   String? get createdBy;
   @override

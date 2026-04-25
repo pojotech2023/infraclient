@@ -18,6 +18,7 @@ class CustomerModel with _$CustomerModel {
     @Default(0) int isInactive,
     @Default('') String createdAt,
     @Default('') String updatedAt,
+    @JsonKey(name: 'profile_pic') String? profilePic,
      String? createdBy,
     String? updatedBy,
   }) = _CustomerModel;
@@ -58,6 +59,7 @@ class CustomerModel with _$CustomerModel {
       isInactive: asInt(json['is_inactive']),
       createdAt: asString(json['created_at']),
       updatedAt: asString(json['updated_at']),
+      profilePic: asString(json['profile_pic']),
     );
   }
 
@@ -74,6 +76,7 @@ class CustomerModel with _$CustomerModel {
       isInactive: isInactive,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      profilePic: profilePic,
       createdBy: createdBy,
       updatedBy: updatedBy,
     );

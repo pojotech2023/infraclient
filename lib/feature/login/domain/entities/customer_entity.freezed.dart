@@ -28,6 +28,7 @@ mixin _$CustomerEntity {
   int get isInactive => throw _privateConstructorUsedError;
   String get createdAt => throw _privateConstructorUsedError;
   String get updatedAt => throw _privateConstructorUsedError;
+  String? get profilePic => throw _privateConstructorUsedError;
   String? get createdBy => throw _privateConstructorUsedError;
   String? get updatedBy => throw _privateConstructorUsedError;
 
@@ -57,6 +58,7 @@ abstract class $CustomerEntityCopyWith<$Res> {
     int isInactive,
     String createdAt,
     String updatedAt,
+    String? profilePic,
     String? createdBy,
     String? updatedBy,
   });
@@ -88,6 +90,7 @@ class _$CustomerEntityCopyWithImpl<$Res, $Val extends CustomerEntity>
     Object? isInactive = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
   }) {
@@ -148,6 +151,11 @@ class _$CustomerEntityCopyWithImpl<$Res, $Val extends CustomerEntity>
                     ? _value.updatedAt
                     : updatedAt // ignore: cast_nullable_to_non_nullable
                         as String,
+            profilePic:
+                freezed == profilePic
+                    ? _value.profilePic
+                    : profilePic // ignore: cast_nullable_to_non_nullable
+                        as String?,
             createdBy:
                 freezed == createdBy
                     ? _value.createdBy
@@ -185,6 +193,7 @@ abstract class _$$CustomerEntityImplCopyWith<$Res>
     int isInactive,
     String createdAt,
     String updatedAt,
+    String? profilePic,
     String? createdBy,
     String? updatedBy,
   });
@@ -215,6 +224,7 @@ class __$$CustomerEntityImplCopyWithImpl<$Res>
     Object? isInactive = null,
     Object? createdAt = null,
     Object? updatedAt = null,
+    Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
   }) {
@@ -275,6 +285,11 @@ class __$$CustomerEntityImplCopyWithImpl<$Res>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                     as String,
+        profilePic:
+            freezed == profilePic
+                ? _value.profilePic
+                : profilePic // ignore: cast_nullable_to_non_nullable
+                    as String?,
         createdBy:
             freezed == createdBy
                 ? _value.createdBy
@@ -305,6 +320,7 @@ class _$CustomerEntityImpl implements _CustomerEntity {
     required this.isInactive,
     required this.createdAt,
     required this.updatedAt,
+    this.profilePic,
     this.createdBy,
     this.updatedBy,
   });
@@ -332,13 +348,15 @@ class _$CustomerEntityImpl implements _CustomerEntity {
   @override
   final String updatedAt;
   @override
+  final String? profilePic;
+  @override
   final String? createdBy;
   @override
   final String? updatedBy;
 
   @override
   String toString() {
-    return 'CustomerEntity(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, createdBy: $createdBy, updatedBy: $updatedBy)';
+    return 'CustomerEntity(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, profilePic: $profilePic, createdBy: $createdBy, updatedBy: $updatedBy)';
   }
 
   @override
@@ -362,6 +380,8 @@ class _$CustomerEntityImpl implements _CustomerEntity {
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.profilePic, profilePic) ||
+                other.profilePic == profilePic) &&
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.updatedBy, updatedBy) ||
@@ -382,6 +402,7 @@ class _$CustomerEntityImpl implements _CustomerEntity {
     isInactive,
     createdAt,
     updatedAt,
+    profilePic,
     createdBy,
     updatedBy,
   );
@@ -411,6 +432,7 @@ abstract class _CustomerEntity implements CustomerEntity {
     required final int isInactive,
     required final String createdAt,
     required final String updatedAt,
+    final String? profilePic,
     final String? createdBy,
     final String? updatedBy,
   }) = _$CustomerEntityImpl;
@@ -437,6 +459,8 @@ abstract class _CustomerEntity implements CustomerEntity {
   String get createdAt;
   @override
   String get updatedAt;
+  @override
+  String? get profilePic;
   @override
   String? get createdBy;
   @override
