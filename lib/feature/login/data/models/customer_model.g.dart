@@ -22,6 +22,7 @@ _$CustomerModelImpl _$$CustomerModelImplFromJson(Map<String, dynamic> json) =>
       profilePic: json['profile_pic'] as String?,
       createdBy: json['createdBy'] as String?,
       updatedBy: json['updatedBy'] as String?,
+      token: json['token'] as String?,
     );
 
 Map<String, dynamic> _$$CustomerModelImplToJson(_$CustomerModelImpl instance) =>
@@ -40,4 +41,5 @@ Map<String, dynamic> _$$CustomerModelImplToJson(_$CustomerModelImpl instance) =>
       'profile_pic': instance.profilePic,
       'createdBy': instance.createdBy,
       'updatedBy': instance.updatedBy,
+      'token': instance.token,
     };

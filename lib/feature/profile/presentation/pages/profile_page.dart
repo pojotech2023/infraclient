@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:convert';
 
 import '../../../../core/cache/local_storage.dart';
 import '../widgets/profile_sliver_header.dart';
 import '../widgets/profile_content_sections.dart';
 import '../../domain/repositories/profile_repository.dart';
+import '../bloc/profile_bloc.dart';
+import '../bloc/profile_event.dart';
+import '../bloc/profile_state.dart';
 
 class ProfileTabPage extends StatefulWidget {
   const ProfileTabPage({super.key});
@@ -19,14 +23,13 @@ class ProfileTabPage extends StatefulWidget {
 class _ProfileTabPageState extends State<ProfileTabPage> {
   final GlobalKey _headerKey = GlobalKey();
   final GlobalKey _contentKey = GlobalKey();
-  bool _isUploading = false;
 
   void _restartAnimations() {
     (_headerKey.currentState as dynamic)?.restartAnimation();
     (_contentKey.currentState as dynamic)?.restartAnimation();
   }
 
-  Future<void> _pickAndUploadImage(int customerId) async {
+  Future<void> _pickAndUploadImage(BuildContext context) async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(
       source: ImageSource.gallery,
@@ -34,33 +37,27 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
     );
 
     if (image != null) {
-      setState(() {
-        _isUploading = true;
-      });
-
-      try {
-        final profileRepo = GetIt.I<ProfileRepository>();
-        await profileRepo.updateProfilePicture(
-          customerId: customerId,
-          imagePath: image.path,
+      final localStorage = GetIt.I<LocalStorage>();
+      final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
+      if (rawUser != null) {
+        Map<String, dynamic> user = {};
+        if (rawUser is String) {
+          user = json.decode(rawUser);
+        } else if (rawUser is Map) {
+          user = Map<String, dynamic>.from(rawUser);
+        }
+        
+        user['local_profile_pic'] = image.path;
+        
+        await localStorage.save(
+          key: 'user',
+          value: json.encode(user),
+          boxName: 'auth',
         );
         
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile picture updated successfully')),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isUploading = false;
-          });
+        // Refresh the profile to show the new picture
+        if (context.mounted) {
+          context.read<ProfileBloc>().add(LoadProfile());
         }
       }
     }
@@ -68,52 +65,80 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
 
   @override
   Widget build(BuildContext context) {
-    final localStorage = GetIt.I<LocalStorage>();
+    return BlocProvider(
+      create: (context) => GetIt.I<ProfileBloc>()..add(LoadProfile()),
+      child: BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${state.message}')),
+            );
+          } else if (state is ProfileLoaded) {
+            // You could show a success message if needed
+          }
+        },
+        builder: (context, state) {
+          if (state is ProfileInitial || state is ProfileLoading) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
 
-    return FutureBuilder(
-      future: localStorage.load(key: 'user', boxName: 'auth'),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting && !_isUploading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+          if (state is ProfileError) {
+            print('ProfileError: ${state.message}');
+            return Scaffold(
+              body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Failed to load profile.'),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.message, 
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context.read<ProfileBloc>().add(LoadProfile()),
+                        child: Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
 
-        if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('Error: ${snapshot.error}')),
-          );
-        }
+          if (state is ProfileLoaded) {
+            final profile = state.profile;
 
-        final rawUser = snapshot.data;
-        Map<String, dynamic> user = {};
-        if (rawUser is String) {
-          user = json.decode(rawUser);
-        } else if (rawUser is Map) {
-          user = Map<String, dynamic>.from(rawUser);
-        }
-
-        final int id = user['id'] ?? 0;
-        final String name = user['name'] ?? "User";
-        final String email = user['email'] ?? "";
-        final String? profilePic = user['profile_pic'];
-
-        return Scaffold(
-          backgroundColor: Theme.of(context).primaryColor,
-          body: Stack(
-            children: [
-              CustomScrollView(
+            return Scaffold(
+              backgroundColor: Theme.of(context).primaryColor,
+              body: CustomScrollView(
                 slivers: [
                   ProfileSliverHeader(
                     key: _headerKey,
-                    name: name,
-                    email: email,
-                    profilePic: profilePic,
-                    onPickImage: () => _pickAndUploadImage(id),
+                    name: profile.name,
+                    email: profile.email,
+                    profilePic: profile.profilePic,
+                    onPickImage: () => _pickAndUploadImage(context),
                     onEditProfile: () async {
-                      final result = await context.push('/edit-profile', extra: user);
+                      // Pass the CustomerEntity converted to a Map (or just pass the entity)
+                      final Map<String, dynamic> extraData = {
+                        'id': profile.id,
+                        'name': profile.name,
+                        'email': profile.email,
+                        'dob': profile.dob,
+                        'address': profile.address,
+                        'marriage_date': profile.marriageDate,
+                        'mobile_no': profile.mobileNo,
+                      };
+                      final result = await context.push('/edit-profile', extra: extraData);
                       if (result == true) {
-                        setState(() {}); // Refresh the FutureBuilder
+                        context.read<ProfileBloc>().add(LoadProfile());
                       }
                     },
                   ),
@@ -122,22 +147,18 @@ class _ProfileTabPageState extends State<ProfileTabPage> {
                   ),
                 ],
               ),
-              if (_isUploading)
-                Container(
-                  color: Colors.black45,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: Colors.white),
-                  ),
-                ),
-            ],
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _restartAnimations,
-            tooltip: 'Restart Animations',
-            child: const Icon(Icons.refresh),
-          ),
-        );
-      },
+              floatingActionButton: FloatingActionButton(
+                onPressed: _restartAnimations,
+                tooltip: 'Restart Animations',
+                child: const Icon(Icons.refresh),
+              ),
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
+

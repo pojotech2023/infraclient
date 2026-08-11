@@ -25,13 +25,14 @@ class TicketMessageBloc extends Bloc<TicketMessageEvent, TicketMessageState> {
 
    on<SendMessage>((event, emit) async {
  final currentState = state;
-      List<dynamic> existingMessages = [];
+      List<TicketMessageEntity> existingMessages = [];
 
       if (currentState is TicketMessageLoaded) {
         existingMessages = List.from(currentState.messages);
+        emit(TicketMessageLoaded(messages: existingMessages, isSending: true));
+      } else {
+        emit(TicketMessageSending());
       }
-
-      emit(TicketMessageSending());
 
 
   final result = await sendTicketMessage(
@@ -44,14 +45,9 @@ class TicketMessageBloc extends Bloc<TicketMessageEvent, TicketMessageState> {
 
   await result.fold(
     (failure) async => emit(TicketMessageError(message: failure.message)),
-    (newMessage) async {
-       DateTime now = DateTime.now().toUtc(); // convert to UTC
-      String formatted = now.toIso8601String();
-          // Append new message to existing messages
-          List<TicketMessageEntity> updatedMessages = List.from(existingMessages)..add(
-            TicketMessageEntity(id: 0, ticketId: 0, createdAt: formatted, senderType: 'client', updatedAt: formatted,message:event.message )
-          );
-          emit(TicketMessageLoaded(messages: updatedMessages));
+    (_) async {
+          // Reload messages from server to get accurate data (including image URLs)
+          add(LoadTicketMessages(ticketId: int.parse(event.ticketId)));
         },
       );
     }

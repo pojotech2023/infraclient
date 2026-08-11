@@ -60,23 +60,37 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
 
   
 
- if (attachment != null) {
+    if (attachment != null) {
       final ext = attachment.path.split('.').last.toLowerCase();
       final isImage = ['jpg', 'jpeg', 'png'].contains(ext);
       final isVideo = ['mp4', 'mov', 'mkv'].contains(ext);
+      final isPdf = ext == 'pdf';
+      final isExcel = ['xls', 'xlsx'].contains(ext);
 
       final fieldKey = 'attachment'; // ✅ depends on backend
-      final type = isImage
-          ? MediaType('image', ext)
-          : isVideo
-          ? MediaType('video', ext)
-          : null;
+      MediaType? type;
+      if (isImage) {
+        type = MediaType('image', ext);
+      } else if (isVideo) {
+        type = MediaType('video', ext);
+      } else if (isPdf) {
+        type = MediaType('application', 'pdf');
+      } else if (isExcel) {
+        type = ext == 'xls' 
+            ? MediaType('application', 'vnd.ms-excel') 
+            : MediaType('application', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      }
 
       if (type != null) {
-        request.files.add(await http.MultipartFile.fromPath(fieldKey, attachment.path, contentType: type));
+        request.files.add(await http.MultipartFile.fromPath(
+          fieldKey, 
+          attachment.path, 
+          contentType: type,
+          filename: attachment.path.split('/').last,
+        ));
       } else {
         print("⚠️ Unsupported file type: $ext");
-        return null;
+        return;
       }
     }
 

@@ -1,6 +1,7 @@
 import 'package:builder_customer/core/localization/context_ext.dart';
 import 'package:custom_ui/custom_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -76,7 +77,20 @@ CustomTextField(
   style: TextFieldStyle.outlined,
   controller: mobileController,
   keyboardType: TextInputType.phone,
- 
+  maxLength: 10,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly,
+  ],
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Mobile number cannot be empty';
+    }
+    if (value.length != 10) {
+      return 'Enter a valid 10-digit mobile number';
+    }
+    return null;
+  },
+  autovalidateMode: AutovalidateMode.onUserInteraction,
 ),
 
 

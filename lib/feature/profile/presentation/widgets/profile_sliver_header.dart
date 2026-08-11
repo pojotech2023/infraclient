@@ -96,7 +96,9 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                       CircleAvatar(
                         radius: 18,
                         backgroundImage: (widget.profilePic != null && widget.profilePic!.isNotEmpty)
-                            ? NetworkImage(widget.profilePic!)
+                            ? (widget.profilePic!.startsWith('/') || widget.profilePic!.startsWith('C:') || widget.profilePic!.startsWith('file://')
+                                ? FileImage(File(widget.profilePic!)) as ImageProvider
+                                : NetworkImage(widget.profilePic!))
                             : null,
                         backgroundColor: Colors.white,
                         child: (widget.profilePic == null || widget.profilePic!.isEmpty)
@@ -172,7 +174,9 @@ class _ProfileSliverHeaderState extends State<ProfileSliverHeader>
                                 child: CircleAvatar(
                                   backgroundColor: Colors.white24,
                                   backgroundImage: (widget.profilePic != null && widget.profilePic!.isNotEmpty)
-                                      ? NetworkImage(widget.profilePic!)
+                                      ? (widget.profilePic!.startsWith('/') || widget.profilePic!.startsWith('C:') || widget.profilePic!.startsWith('file://')
+                                          ? FileImage(File(widget.profilePic!)) as ImageProvider
+                                          : NetworkImage(widget.profilePic!))
                                       : null,
                                   child: (widget.profilePic == null || widget.profilePic!.isEmpty)
                                       ? const Icon(Icons.person, size: 40, color: Colors.white)

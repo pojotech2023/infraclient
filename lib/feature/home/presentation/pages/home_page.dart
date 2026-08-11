@@ -67,7 +67,14 @@ print("SITE ID: $siteId");
             if (state is ChecklistLoaded) {
 
 
-           return ChecklistListView(checklist: state.checklist); 
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<ChecklistBloc>().add(FetchChecklistEvent(siteId));
+                // Wait briefly so the indicator shows while the bloc state transitions
+                await Future.delayed(const Duration(milliseconds: 500));
+              },
+              child: ChecklistListView(checklist: state.checklist),
+            );
             
             
             }

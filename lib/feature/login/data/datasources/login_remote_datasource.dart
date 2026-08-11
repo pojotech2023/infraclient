@@ -31,7 +31,10 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data['status'] == true) {
-        return CustomerModel.safeFromJson(data['data']['customer']);
+        final customerJson = data['data']['customer'];
+        final token = data['data']['token'] ?? data['token']; // Fallback in case it's outside
+        final model = CustomerModel.safeFromJson(customerJson);
+        return model.copyWith(token: token?.toString());
       } else {
         throw Exception(data['message'] ?? 'Failed to login');
       }

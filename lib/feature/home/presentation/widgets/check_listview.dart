@@ -1,5 +1,6 @@
 import 'package:builder_customer/feature/home/domain/entities/checklist_entity.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/config/env_service.dart';
 
 // assume each checklist item has: stage, tasks[{taskName, status, remarks}]
 
@@ -17,6 +18,7 @@ class _ChecklistListViewState extends State<ChecklistListView> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: widget.checklist.length,
       itemBuilder: (context, index) {
         final data = widget.checklist[index];
@@ -66,39 +68,102 @@ class _ChecklistListViewState extends State<ChecklistListView> {
                     _ => Colors.red,
                   };
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 16,
-                                decoration: BoxDecoration(
-                                  color: statusColor.withOpacity(0.4),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: statusColor,
-                                    width: 2,
-                                  ),
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 16,
+                                            height: 16,
+                                            decoration: BoxDecoration(
+                                              color: statusColor.withOpacity(0.4),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: statusColor,
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(child: Text(task.taskName ?? '')),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(child: Text(task.taskName ?? '')),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-            ],
-          ),
-        );
-      },
-    );
+                                if (task.image.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 32, top: 8),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(MaterialPageRoute(
+                                          builder: (_) => Scaffold(
+                                            backgroundColor: Colors.black,
+                                            appBar: AppBar(
+                                              backgroundColor: Colors.black,
+                                              iconTheme: const IconThemeData(color: Colors.white),
+                                            ),
+                                            body: Center(
+                                              child: InteractiveViewer(
+                                                panEnabled: true,
+                                                minScale: 0.5,
+                                                maxScale: 4.0,
+                                                child: Image.network(
+                                                  task.image.startsWith('http') 
+                                                    ? task.image 
+                                                    : '${EnvService.getString('IMAGE_URL')}/${task.image}',
+                                                  errorBuilder: (context, error, stackTrace) =>
+                                                      const Icon(Icons.broken_image, color: Colors.white, size: 50),
+                                                  loadingBuilder: (context, child, loadingProgress) {
+                                                    if (loadingProgress == null) return child;
+                                                    return const CircularProgressIndicator(color: Colors.white);
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ));
+                                      },
+                                      child: Container(
+                                        height: 80,
+                                        width: 80,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.grey.shade300),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(
+                                            task.image.startsWith('http') 
+                                              ? task.image 
+                                              : '${EnvService.getString('IMAGE_URL')}/${task.image}',
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image, color: Colors.grey),
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
+                );
+              },
+            );
   }
 }

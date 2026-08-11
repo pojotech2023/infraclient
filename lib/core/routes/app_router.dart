@@ -15,6 +15,9 @@ import '../../feature/login/presentation/page/login_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+// Provide a global instance of AppRouter
+final AppRouter appRouter = AppRouter();
+
 class AppRouter {
   AppRouter({String? initialLocation}) : router = GoRouter(
     navigatorKey: _rootNavigatorKey,

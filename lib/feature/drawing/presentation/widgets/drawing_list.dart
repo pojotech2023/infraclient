@@ -49,9 +49,24 @@ GoRouter.of(context).push('/drawingDetail', extra: params);
         required String title,
         required VoidCallback onTap,
       }) {
+        
+    final bool isPdf = image.toLowerCase().endsWith('.pdf');
+    final bool isDoc = image.toLowerCase().endsWith('.doc') || image.toLowerCase().endsWith('.docx');
+
     return InkWell(
       onTap: onTap,
       child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -60,36 +75,45 @@ GoRouter.of(context).push('/drawingDetail', extra: params);
                 topLeft: Radius.circular(15),
                 topRight: Radius.circular(15),
               ),
-              child:      Container(
+              child: Container(
                 width: MediaQuery.sizeOf(context).width,
                 height: 100,
-                margin: EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(image),
-                    fit: BoxFit.cover,
-                    onError: (exception, stackTrace) {
-                      debugPrint('Image load failed: $exception');
-                    },
-                  ),borderRadius:BorderRadius.circular(8),
-              
+                color: Colors.grey.shade200,
+                child: isPdf
+                  ? const Icon(Icons.picture_as_pdf, size: 50, color: Colors.red)
+                  : isDoc
+                    ? const Icon(Icons.description, size: 50, color: Colors.blue)
+                    : Image.network(
+                        image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          debugPrint('Image load failed: $error');
+                          return const Icon(Icons.broken_image, size: 40, color: Colors.grey);
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(child: CircularProgressIndicator());
+                        },
+                      ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ),
             ),
-          
-            Center(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-          
-              ),
-            ),
-      
-
           ],
         ),
       ),
     );
-
   }
 }

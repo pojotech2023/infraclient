@@ -5,11 +5,7 @@ class HiveLocalStorage implements LocalStorage {
   @override
   Future<dynamic> load({required String key, String? boxName}) async {
     final box = await Hive.openBox(boxName!);
-    try {
-      return await box.get(key);
-    } finally {
-      await box.close();
-    }
+    return await box.get(key);
   }
 
   @override
@@ -19,21 +15,13 @@ class HiveLocalStorage implements LocalStorage {
     String? boxName,
   }) async {
     final box = await Hive.openBox(boxName!);
-    try {
-      await box.put(key, value);
-    } finally {
-      await box.close();
-    }
+    await box.put(key, value);
   }
 
   @override
   Future<void> delete({required String key, String? boxName}) async {
     final box = await Hive.openBox(boxName!);
-    try {
-      await box.delete(key);
-    } finally {
-      await box.close();
-    }
+    await box.delete(key);
   }
 
   /// ✅ Clears and closes all boxes manually.

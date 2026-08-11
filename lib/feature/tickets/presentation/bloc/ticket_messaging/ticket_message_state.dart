@@ -12,11 +12,12 @@ class TicketMessageLoading extends TicketMessageState {}
 class TicketMessageSending extends TicketMessageState {}
 class TicketMessageLoaded extends TicketMessageState {
   final List<TicketMessageEntity> messages;
+  final bool isSending;
 
-  TicketMessageLoaded({required this.messages});
+  TicketMessageLoaded({required this.messages, this.isSending = false});
 
   @override
-  List<Object?> get props => [messages];
+  List<Object?> get props => [messages, isSending];
 }
 class TicketMessageError extends TicketMessageState {
   final String message;

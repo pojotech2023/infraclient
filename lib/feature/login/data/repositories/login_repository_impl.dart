@@ -32,6 +32,7 @@ class LoginRepositoryImpl implements LoginRepository {
     'is_inactive': customer.isInactive,
     'created_at': customer.createdAt,
     'updated_at': customer.updatedAt,
+    if (customer.token != null) 'token': customer.token,
   }),
   boxName: 'auth',
 );

@@ -50,15 +50,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     try {
       final profileRepo = GetIt.I<ProfileRepository>();
-      final int customerId = widget.userData['id'] ?? 0;
+      
+      final Map<String, dynamic> data = {};
+      if (nameController.text != widget.userData['name']) {
+        data['name'] = nameController.text;
+      }
+      if (emailController.text != widget.userData['email']) {
+        data['email'] = emailController.text;
+      }
+      if (dobController.text != widget.userData['dob']) {
+        data['dob'] = dobController.text;
+      }
+      if (addressController.text != widget.userData['address']) {
+        data['address'] = addressController.text;
+      }
 
-      await profileRepo.updateProfileDetails(
-        customerId: customerId,
-        name: nameController.text,
-        email: emailController.text,
-        dob: dobController.text,
-        address: addressController.text,
-      );
+      if (data.isNotEmpty) {
+        await profileRepo.updateProfileDetails(data);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

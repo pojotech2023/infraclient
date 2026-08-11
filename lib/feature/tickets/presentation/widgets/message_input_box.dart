@@ -50,17 +50,42 @@ class _MessageInputBoxState extends State<MessageInputBox> {
   }
 
   Widget _attachmentPreview() {
-    final isImage = _attachment!.path.endsWith('.jpg') ||
-        _attachment!.path.endsWith('.jpeg') ||
-        _attachment!.path.endsWith('.png');
+    final path = _attachment!.path.toLowerCase();
+    final isImage = path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png');
+    final isVideo = path.endsWith('.mp4') || path.endsWith('.mov') || path.endsWith('.mkv');
+    final isPdf = path.endsWith('.pdf');
+    final isExcel = path.endsWith('.xls') || path.endsWith('.xlsx');
+
+    Widget previewWidget;
+    if (isImage) {
+      previewWidget = Image.file(_attachment!, height: 90, width: 90, fit: BoxFit.cover);
+    } else if (isVideo) {
+      previewWidget = Container(
+        height: 90, width: 90, color: Colors.black87,
+        child: const Center(child: Icon(Icons.play_circle_outline, color: Colors.white, size: 40)),
+      );
+    } else if (isPdf) {
+      previewWidget = Container(
+        height: 90, width: 90, color: Colors.red.shade50,
+        child: const Center(child: Icon(Icons.picture_as_pdf, color: Colors.red, size: 40)),
+      );
+    } else if (isExcel) {
+      previewWidget = Container(
+        height: 90, width: 90, color: Colors.green.shade50,
+        child: const Center(child: Icon(Icons.table_chart, color: Colors.green, size: 40)),
+      );
+    } else {
+      previewWidget = Container(
+        height: 90, width: 90, color: Colors.grey.shade200,
+        child: const Center(child: Icon(Icons.insert_drive_file, size: 40)),
+      );
+    }
 
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: isImage
-              ? Image.file(_attachment!, height: 90, width: 90, fit: BoxFit.cover)
-              : const Icon(Icons.insert_drive_file, size: 50),
+          child: previewWidget,
         ),
         Positioned(
           top: 4,
@@ -81,27 +106,47 @@ class _MessageInputBoxState extends State<MessageInputBox> {
   void _showAttachmentOptions() async {
     showModalBottomSheet(
       context: context,
-      builder: (_) => Wrap(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.image),
-            title: const Text('Pick Image'),
-            onTap: () async {
-              Navigator.pop(context);
-              final file = await FilePickerHelper.pickImage();
-              if (file != null) setState(() => _attachment = file);
-            },
-          ),
-                ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Capture Photo'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final file = await FilePickerHelper.pickImage(fromCamera: true);
-                  if (file != null) setState(() => _attachment = file);
-                },
-              ),
-        ],
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Pick Image'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await FilePickerHelper.pickImage();
+                if (file != null) setState(() => _attachment = file);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.videocam),
+              title: const Text('Pick Video'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await FilePickerHelper.pickVideo();
+                if (file != null) setState(() => _attachment = file);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Capture Photo'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await FilePickerHelper.pickImage(fromCamera: true);
+                if (file != null) setState(() => _attachment = file);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.insert_drive_file),
+              title: const Text('Pick Document (PDF/Excel)'),
+              onTap: () async {
+                Navigator.pop(context);
+                final file = await FilePickerHelper.pickDocument();
+                if (file != null) setState(() => _attachment = file);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -45,12 +45,17 @@ class TicketChatPage extends StatelessWidget {
 
 
 
- Expanded(
+                  Expanded(
                     child: ListView.builder(
                       itemCount: messages.length,
                       itemBuilder: (_, i) => MessageBubble(msg: messages[i]),
                     ),
                   ),
+                  if (state.isSending)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: CircularProgressIndicator(),
+                    ),
                   SafeArea(
                     child: MessageInputBox(
                       onSend: (message, attachment) {

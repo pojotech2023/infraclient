@@ -1,19 +1,20 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../core/config/env_service.dart';
+import '../../../login/data/models/customer_model.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<String> uploadProfilePicture({
     required int customerId,
     required String imagePath,
+    required String token,
   });
 
+  Future<CustomerModel> getClientProfile({required String token});
+
   Future<void> updateProfileDetails({
-    required int customerId,
-    required String name,
-    required String email,
-    required String dob,
-    required String address,
+    required Map<String, dynamic> data,
+    required String token,
   });
 }
 
@@ -27,18 +28,50 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   });
 
   @override
+  Future<CustomerModel> getClientProfile({required String token}) async {
+    final uri = Uri.parse('$baseUrl/client-profile');
+    print('--- API REQUEST: getClientProfile ---');
+    print('URL: $uri');
+
+    final response = await client.get(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print('--- API RESPONSE: getClientProfile ---');
+    print('STATUS: ${response.statusCode}');
+    print('BODY: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status'] == true) {
+        return CustomerModel.safeFromJson(data['data']);
+      } else {
+        throw Exception(data['message'] ?? 'Failed to fetch client profile');
+      }
+    } else {
+      throw Exception('Failed to fetch profile: ${response.statusCode}');
+    }
+  }
+
+  @override
   Future<String> uploadProfilePicture({
-    required int customerId,
+    required int customerId, // keeping customerId if it's still needed by multipart payload, but ideally should use token if possible. wait, I should probably still pass token if the server needs it.
+    // wait, I'll update it later if needed. For now, keep signature or update signature? I'll update signature to require token.
     required String imagePath,
+    required String token,
   }) async {
     final uri = Uri.parse('$baseUrl/update-profile-picture');
     
     print('--- API REQUEST: uploadProfilePicture ---');
     print('URL: $uri');
-    print('CUSTOMER_ID: $customerId');
     print('IMAGE_PATH: $imagePath');
 
     final request = http.MultipartRequest('POST', uri);
+    request.headers['Authorization'] = 'Bearer $token';
     request.fields['customer_id'] = customerId.toString();
     
     request.files.add(
@@ -71,28 +104,22 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<void> updateProfileDetails({
-    required int customerId,
-    required String name,
-    required String email,
-    required String dob,
-    required String address,
+    required Map<String, dynamic> data,
+    required String token,
   }) async {
-    final uri = Uri.parse('$baseUrl/update-profile');
+    final uri = Uri.parse('$baseUrl/client-profile-update');
     
     print('--- API REQUEST: updateProfileDetails ---');
     print('URL: $uri');
-    print('DATA: customer_id=$customerId, name=$name, email=$email, dob=$dob, address=$address');
+    print('DATA: $data');
 
     final response = await client.post(
       uri,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'customer_id': customerId,
-        'name': name,
-        'email': email,
-        'dob': dob,
-        'address': address,
-      }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode(data),
     );
 
     print('--- API RESPONSE: updateProfileDetails ---');
@@ -103,9 +130,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       throw Exception('Failed to update profile: ${response.body}');
     }
 
-    final data = json.decode(response.body);
-    if (data['status'] != true) {
-      throw Exception(data['message'] ?? 'Failed to update profile');
+    final responseData = json.decode(response.body);
+    if (responseData['status'] != true) {
+      throw Exception(responseData['message'] ?? 'Failed to update profile');
     }
   }
 }

@@ -107,14 +107,16 @@ class _ProfileContentSectionsState extends State<ProfileContentSections>
       future: localStorage.load(key: 'user', boxName: 'auth'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          return const SizedBox(
+            height: 200,
+            child: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasError) {
-          return Scaffold(
-            body: Center(child: Text('Error: ${snapshot.error}')),
+          return SizedBox(
+            height: 200,
+            child: Center(child: Text('Error: ${snapshot.error}')),
           );
         }
 
@@ -127,7 +129,13 @@ class _ProfileContentSectionsState extends State<ProfileContentSections>
         }
         final String name = user['name'] ?? "";
         final String email = user['email'] ?? "";
-         final String dob = user['dob'] ?? "N/A";
+        String dob = user['dob'] ?? "N/A";
+        if (dob.contains('-')) {
+          final parts = dob.split('-');
+          if (parts.length == 3 && parts[0].length == 4) {
+            dob = '${parts[2]}-${parts[1]}-${parts[0]}';
+          }
+        }
         final String mobile = user['mobile_no'] ?? "N/A";
         final String address = user['address'] ?? "N/A";
         final String city = user['city'] ?? "";
@@ -204,39 +212,9 @@ class _ProfileContentSectionsState extends State<ProfileContentSections>
             BlocBuilder<ThemeBloc, ThemeState>(
               builder: (context, state) {
                     return _AnimatedMenuSection(
-                  title:  context.l10n?.accountManagement ??  'Account Management',
+                  title: '',
                   items: [
-                    // MenuItem(
-                    //   icon: Icons.lock_outline,
-                    //   title: 'Change Password',
-                    //   onTap: () => _showSnackBar(context, 'Change Password'),
-                    // ),
-
                     MenuItem(
-                      icon: state.themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                      title: context.l10n?.theme ?? 'Theme',
-                      trailing: Switch(
-                        value: state.themeMode == ThemeMode.dark,
-                        onChanged: (value) {
-                          context.read<ThemeBloc>().add(
-                            ThemeModeChanged(value ? ThemeMode.dark : ThemeMode.light),
-                          );
-                        },
-                        activeColor: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    MenuItem(
-                      icon: Icons.palette,
-                      title:    context.l10n?.colorScheme?? 'Color scheme',
-                      onTap: () => context.push('/theme'),
-                    ),
-                    MenuItem(
-                      icon: Icons.translate,
-                      title:  context.l10n?.language?? 'Language',
-                      onTap: () => context.push('/language'),
-                    ),
-
-                                        MenuItem(
                       icon: Icons.logout,
                       title:     context.l10n?.logout?? 'Logout',
                       onTap: () async {
@@ -292,32 +270,30 @@ class _AnimatedMenuSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(-1.0, 0.0),
-            end: Offset.zero,
-          ).animate(CurvedAnimation(
-            parent: animationController,
-            curve: Interval(startDelay.clamp(0.0, 1.0), (startDelay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOutCubic),
-          )),
-          child: FadeTransition(
-            opacity: Tween<double>(
-              begin: 0.0,
-              end: 1.0,
+        if (title.isNotEmpty)
+          SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(-1.0, 0.0),
+              end: Offset.zero,
             ).animate(CurvedAnimation(
               parent: animationController,
-              curve: Interval(startDelay.clamp(0.0, 1.0), (startDelay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOut),
+              curve: Interval(startDelay.clamp(0.0, 1.0), (startDelay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOutCubic),
             )),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.headlineSmall
-              
-              
-         
+            child: FadeTransition(
+              opacity: Tween<double>(
+                begin: 0.0,
+                end: 1.0,
+              ).animate(CurvedAnimation(
+                parent: animationController,
+                curve: Interval(startDelay.clamp(0.0, 1.0), (startDelay + 0.3).clamp(0.0, 1.0), curve: Curves.easeOut),
+              )),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 15),
+        if (title.isNotEmpty) const SizedBox(height: 15),
         ...items.asMap().entries.map((entry) {
           int index = entry.key;
           MenuItem item = entry.value;

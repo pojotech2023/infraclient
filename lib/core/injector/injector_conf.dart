@@ -46,6 +46,7 @@ import '../../feature/login/presentation/bloc/login_bloc.dart';
 import '../../feature/profile/data/datasources/profile_remote_datasource.dart';
 import '../../feature/profile/data/repositories/profile_repository_impl.dart';
 import '../../feature/profile/domain/repositories/profile_repository.dart';
+import '../../feature/profile/presentation/bloc/profile_bloc.dart';
 
 final getIt = GetIt.I;
 
@@ -195,6 +196,9 @@ getIt.registerFactory<DrawingBloc>(
       remoteDataSource: getIt<ProfileRemoteDataSource>(),
       localStorage: getIt<LocalStorage>(),
     ),
+  );
+  getIt.registerFactory<ProfileBloc>(
+    () => ProfileBloc(repository: getIt<ProfileRepository>()),
   );
 
   // ---------------------------

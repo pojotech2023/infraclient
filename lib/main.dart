@@ -10,7 +10,9 @@ import 'core/theme/bloc/theme_bloc.dart';
 import 'core/theme/bloc/theme_event.dart';
 import 'core/localization/bloc/locale_bloc.dart';
 import 'core/localization/bloc/locale_event.dart';
+import 'core/services/fcm_service.dart';
 import 'feature/startup/presentation/pages/startup_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,14 @@ Future<void> main() async {
   await EnvService.loadEnvFile('prod');
   final appConfig = EnvService.getAppConfigFromEnv();
   FlavorConfig.init(appConfig);
+
+  // Initialize Firebase and FCM
+  try {
+    await Firebase.initializeApp();
+    await FCMService().init();
+  } catch (e) {
+    print('Firebase initialization error: $e');
+  }
 
   // Connectivity Checking
   final connectionChecker = ConnectionCheckerImpl(Connectivity());

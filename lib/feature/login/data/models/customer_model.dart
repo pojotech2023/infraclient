@@ -21,6 +21,7 @@ class CustomerModel with _$CustomerModel {
     @JsonKey(name: 'profile_pic') String? profilePic,
      String? createdBy,
     String? updatedBy,
+    String? token,
   }) = _CustomerModel;
 
   const CustomerModel._();
@@ -59,7 +60,9 @@ class CustomerModel with _$CustomerModel {
       isInactive: asInt(json['is_inactive']),
       createdAt: asString(json['created_at']),
       updatedAt: asString(json['updated_at']),
-      profilePic: asString(json['profile_pic']),
+      profilePic: asString(json['local_profile_pic']) != '' 
+          ? asString(json['local_profile_pic']) 
+          : asString(json['profile_pic']),
     );
   }
 

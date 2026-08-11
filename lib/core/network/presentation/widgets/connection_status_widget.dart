@@ -4,45 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/connection_bloc.dart';
 import 'package:builder_customer/core/network/presentation/bloc/connection_state.dart' as connection;
-
 class ConnectionStatusWidget extends StatefulWidget {
   final Widget child;
-
   const ConnectionStatusWidget({super.key, required this.child});
-
   @override
   State<ConnectionStatusWidget> createState() => _ConnectionStatusWidgetState();
 }
-
 class _ConnectionStatusWidgetState extends State<ConnectionStatusWidget> {
-  bool _showGreenBanner = false;
-  String _connectedMessage = "";
-
-  Timer? _timer;
-
-  void _showTemporaryGreen(String msg) {
-    _timer?.cancel();
-    setState(() {
-      _showGreenBanner = true;
-      _connectedMessage = msg;
-    });
-
-    // Hide after 2 seconds
-    _timer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _showGreenBanner = false;
-        });
-      }
-    });
-  }
-
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -50,12 +22,8 @@ class _ConnectionStatusWidgetState extends State<ConnectionStatusWidget> {
         widget.child,
         BlocListener<ConnectionBloc, connection.ConnectionState>(
           listener: (context, state) {
-            if (state is connection.ConnectionLoaded) {
-              if (state.status.isConnected) {
-                // Show green banner with message
-                _showTemporaryGreen(state.status.description);
-              }
-            }
+            // Offline/online state logic is handled below in the builder.
+            // The temporary green banner listener has been removed.
           },
           child: BlocBuilder<ConnectionBloc, connection.ConnectionState>(
             builder: (context, state) {
@@ -69,17 +37,6 @@ class _ConnectionStatusWidgetState extends State<ConnectionStatusWidget> {
                   state.status.description,
                 );
               }
-
-              if (_showGreenBanner) {
-                // Green banner for 2 sec when online again
-                return _buildBanner(
-                  Colors.green,
-                  Colors.green.shade800,
-                  Icons.check_circle_rounded,
-                  _connectedMessage,
-                );
-              }
-
               return const SizedBox.shrink();
             },
           ),
@@ -87,7 +44,6 @@ class _ConnectionStatusWidgetState extends State<ConnectionStatusWidget> {
       ],
     );
   }
-
   Widget _buildBanner(
       Color color1,
       Color color2,

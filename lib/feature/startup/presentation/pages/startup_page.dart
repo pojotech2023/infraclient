@@ -24,12 +24,9 @@ class StartupPage extends StatefulWidget {
 }
 
 class _StartupPageState extends State<StartupPage> {
-  late final AppRouter _appRouter;
-
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter(); // Initialize your router here
   }
 
   @override
@@ -48,7 +45,7 @@ class _StartupPageState extends State<StartupPage> {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               title: '${FlavorConfig.appConfig.name} - Avenum Movie App',
-              routerConfig: _appRouter.router,
+              routerConfig: appRouter.router,
               theme: themeData,
               darkTheme: appearance.getThemeData(
                 Brightness.dark,

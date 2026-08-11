@@ -38,6 +38,7 @@ mixin _$CustomerModel {
   String? get profilePic => throw _privateConstructorUsedError;
   String? get createdBy => throw _privateConstructorUsedError;
   String? get updatedBy => throw _privateConstructorUsedError;
+  String? get token => throw _privateConstructorUsedError;
 
   /// Serializes this CustomerModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -71,6 +72,7 @@ abstract class $CustomerModelCopyWith<$Res> {
     @JsonKey(name: 'profile_pic') String? profilePic,
     String? createdBy,
     String? updatedBy,
+    String? token,
   });
 }
 
@@ -103,6 +105,7 @@ class _$CustomerModelCopyWithImpl<$Res, $Val extends CustomerModel>
     Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
+    Object? token = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -176,6 +179,11 @@ class _$CustomerModelCopyWithImpl<$Res, $Val extends CustomerModel>
                     ? _value.updatedBy
                     : updatedBy // ignore: cast_nullable_to_non_nullable
                         as String?,
+            token:
+                freezed == token
+                    ? _value.token
+                    : token // ignore: cast_nullable_to_non_nullable
+                        as String?,
           )
           as $Val,
     );
@@ -206,6 +214,7 @@ abstract class _$$CustomerModelImplCopyWith<$Res>
     @JsonKey(name: 'profile_pic') String? profilePic,
     String? createdBy,
     String? updatedBy,
+    String? token,
   });
 }
 
@@ -237,6 +246,7 @@ class __$$CustomerModelImplCopyWithImpl<$Res>
     Object? profilePic = freezed,
     Object? createdBy = freezed,
     Object? updatedBy = freezed,
+    Object? token = freezed,
   }) {
     return _then(
       _$CustomerModelImpl(
@@ -310,6 +320,11 @@ class __$$CustomerModelImplCopyWithImpl<$Res>
                 ? _value.updatedBy
                 : updatedBy // ignore: cast_nullable_to_non_nullable
                     as String?,
+        token:
+            freezed == token
+                ? _value.token
+                : token // ignore: cast_nullable_to_non_nullable
+                    as String?,
       ),
     );
   }
@@ -333,6 +348,7 @@ class _$CustomerModelImpl extends _CustomerModel {
     @JsonKey(name: 'profile_pic') this.profilePic,
     this.createdBy,
     this.updatedBy,
+    this.token,
   }) : super._();
 
   factory _$CustomerModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -378,10 +394,12 @@ class _$CustomerModelImpl extends _CustomerModel {
   final String? createdBy;
   @override
   final String? updatedBy;
+  @override
+  final String? token;
 
   @override
   String toString() {
-    return 'CustomerModel(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, profilePic: $profilePic, createdBy: $createdBy, updatedBy: $updatedBy)';
+    return 'CustomerModel(id: $id, siteId: $siteId, name: $name, mobileNo: $mobileNo, email: $email, dob: $dob, marriageDate: $marriageDate, address: $address, isInactive: $isInactive, createdAt: $createdAt, updatedAt: $updatedAt, profilePic: $profilePic, createdBy: $createdBy, updatedBy: $updatedBy, token: $token)';
   }
 
   @override
@@ -410,7 +428,8 @@ class _$CustomerModelImpl extends _CustomerModel {
             (identical(other.createdBy, createdBy) ||
                 other.createdBy == createdBy) &&
             (identical(other.updatedBy, updatedBy) ||
-                other.updatedBy == updatedBy));
+                other.updatedBy == updatedBy) &&
+            (identical(other.token, token) || other.token == token));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -431,6 +450,7 @@ class _$CustomerModelImpl extends _CustomerModel {
     profilePic,
     createdBy,
     updatedBy,
+    token,
   );
 
   /// Create a copy of CustomerModel
@@ -463,6 +483,7 @@ abstract class _CustomerModel extends CustomerModel {
     @JsonKey(name: 'profile_pic') final String? profilePic,
     final String? createdBy,
     final String? updatedBy,
+    final String? token,
   }) = _$CustomerModelImpl;
   const _CustomerModel._() : super._();
 
@@ -500,6 +521,8 @@ abstract class _CustomerModel extends CustomerModel {
   String? get createdBy;
   @override
   String? get updatedBy;
+  @override
+  String? get token;
 
   /// Create a copy of CustomerModel
   /// with the given fields replaced by the non-null parameter values.
