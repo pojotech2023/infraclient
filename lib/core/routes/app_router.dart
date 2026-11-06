@@ -1,3 +1,4 @@
+import 'package:builder_customer/feature/payment_history/presentation/pages/site_payment_history_page.dart';
 import 'package:builder_customer/feature/startup/presentation/pages/splash_page.dart';
 import 'package:builder_customer/feature/tickets/domain/entities/ticket_entity.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,8 @@ import '../../feature/theme/presentation/pages/theme_page.dart';
 import '../../feature/localization/presentation/pages/language_page.dart';
 import '../../feature/login/presentation/page/login_page.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
 // Provide a global instance of AppRouter
 final AppRouter appRouter = AppRouter();
@@ -23,14 +25,14 @@ class AppRouter {
     navigatorKey: _rootNavigatorKey,
     initialLocation: initialLocation ?? '/splash',
     routes: <RouteBase>[
-
-       GoRoute(
-            path: '/splash',
-            name: 'splash',
-            builder: (BuildContext context, GoRouterState state) => const SplashPage(),
-          ),
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) => const SplashPage(),
+      ),
       ShellRoute(
-        navigatorKey: _rootNavigatorKey,
+        navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => DashboardPage(child: child),
         routes: [
           // Main dashboard route - shows the tab content
@@ -42,73 +44,72 @@ class AppRouter {
               return const SizedBox.shrink();
             },
           ),
-          // Theme settings overlay
-        
-          // Language settings overlay
-         
         ],
       ),
-  GoRoute(
-            path: '/theme',
-            name: 'theme',
-            builder: (BuildContext context, GoRouterState state) => const ThemePage(),
-          ),
-       GoRoute(
-            path: '/language',
-            name: 'language',
-            builder: (BuildContext context, GoRouterState state) => const LanguagePage(),
-          ),
-      // Movie routes (outside the shell)
-     GoRoute(
-  path: '/drawingDetail',
-  builder: (context, state) {
-    final params = state.extra as Map<String, dynamic>;
-
-    final url = params['url'] as String;
-    final title = params['title'] as String;
-
-    return DrawingDetailPage(url: url, title: title);
-  },
-),
+      GoRoute(
+        path: '/theme',
+        name: 'theme',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) => const ThemePage(),
+      ),
+      GoRoute(
+        path: '/language',
+        name: 'language',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) => const LanguagePage(),
+      ),
+      GoRoute(
+        path: '/drawingDetail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final params = state.extra as Map<String, dynamic>;
+          final url = params['url'] as String;
+          final title = params['title'] as String;
+          return DrawingDetailPage(url: url, title: title);
+        },
+      ),
       GoRoute(
         path: '/ticket-create',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const TicketCreatePage(),
       ),
-
-
-         GoRoute(
+      GoRoute(
         path: '/ticket/:ticketId',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final ticketId = int.parse(state.pathParameters['ticketId']!);
-         final ticket = state.extra as TicketEntity; // use correct type here
-
-    // Extract siteId and ticketName from the ticket entity
-    final siteId = ticket.siteId;
-    final ticketName = ticket.ticket;
-          return TicketChatPage(siteId: siteId,ticketId: ticketId, ticketName: ticketName);
+          final ticket = state.extra as TicketEntity;
+          final siteId = ticket.siteId;
+          final ticketName = ticket.ticket;
+          return TicketChatPage(siteId: siteId, ticketId: ticketId, ticketName: ticketName);
         },
       ),
       GoRoute(
         path: '/profile',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const ProfileTabPage(),
       ),
       GoRoute(
         path: '/edit-profile',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final userData = state.extra as Map<String, dynamic>;
           return EditProfilePage(userData: userData);
         },
       ),
       GoRoute(
+        path: '/site-payment-history',
+        name: 'site-payment-history',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (BuildContext context, GoRouterState state) => const SitePaymentHistoryPage(),
+      ),
+      GoRoute(
         path: '/login',
+        parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const LoginPage(),
       ),
-      
-    
     ],
   );
 
   final GoRouter router;
 }
-
-

@@ -1,27 +1,19 @@
-import'dart:convert';
+import 'dart:convert';
 import 'package:builder_customer/core/cache/local_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
-import 'package:hive/hive.dart';
-import 'package:intl/intl.dart';
 
-import 'package:builder_customer/core/cache/local_storage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
-import 'package:go_router/go_router.dart';
-
+import '../../../dashboard/presentation/widgets/app_drawer.dart';
 import '../bloc/drawing_bloc.dart';
 import '../bloc/drawing_event.dart';
 import '../bloc/drawing_state.dart';
 import '../widgets/drawing_list.dart';
 
-
-
 class DrawingTabPage extends StatelessWidget {
-  const DrawingTabPage({super.key});
+  final Function(int)? onSelectTab;
+
+  const DrawingTabPage({super.key, this.onSelectTab});
 
   @override
   Widget build(BuildContext context) {
@@ -42,42 +34,71 @@ class DrawingTabPage extends StatelessWidget {
           );
         }
 
-        // final user = snapshot.data ?? {};
-        // final int siteId = user['siteId'] ?? 0;
-final rawUser = snapshot.data;
+        final rawUser = snapshot.data;
 
-Map<String, dynamic> user = {};
+        Map<String, dynamic> user = {};
 
-if (rawUser is String) {
-  user = json.decode(rawUser);
-} else if (rawUser is Map) {
-  user = Map<String, dynamic>.from(rawUser);
-}
+        if (rawUser is String) {
+          user = json.decode(rawUser);
+        } else if (rawUser is Map) {
+          user = Map<String, dynamic>.from(rawUser);
+        }
 
-final int siteId = user['site_id'] ?? 0;
-      
+        final dynamic rawSiteId = user['site_id'] ?? user['siteId'] ?? 0;
+        final int siteId = rawSiteId is int
+            ? rawSiteId
+            : int.tryParse(rawSiteId.toString()) ?? 0;
 
         return BlocProvider(
-          create: (_) =>
-            GetIt.I<DrawingBloc>()..add(DrawingLoad(siteId: siteId)),
+          create: (_) => GetIt.I<DrawingBloc>()..add(DrawingLoad(siteId: siteId)),
           child: Scaffold(
-            appBar: AppBar(title: const Text('Drawings')),
-      
+            appBar: AppBar(
+              title: const Text('Drawings'),
+              leading: Builder(
+                builder: (ctx) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(ctx).openDrawer(),
+                ),
+              ),
+            ),
+            drawer: AppDrawer(onSelectTab: onSelectTab),
             body: BlocBuilder<DrawingBloc, DrawingState>(
               builder: (context, state) {
                 if (state is DrawingLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (state is DrawingLoaded) {
-                 return RefreshIndicator(
-                   onRefresh: () async {
-                     context.read<DrawingBloc>().add(DrawingLoad(siteId: siteId));
-                   },
-                   child: DrawingList(data:state.data),
-                 );
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<DrawingBloc>().add(DrawingLoad(siteId: siteId));
+                    },
+                    child: DrawingList(data: state.data),
+                  );
                 }
                 if (state is DrawingError) {
-                  return Center(child: Text(state.message));
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.error_outline, size: 48, color: Colors.orange),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 15, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () => context.read<DrawingBloc>().add(DrawingLoad(siteId: siteId)),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text("Retry"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
                 return const SizedBox.shrink();
               },

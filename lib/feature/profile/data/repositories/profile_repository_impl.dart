@@ -16,13 +16,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<CustomerEntity> getClientProfile() async {
-    final token = await _getToken();
-    final customerModel = await remoteDataSource.getClientProfile(token: token);
-    
-    // Save fresh data to local storage
-    await _saveUserToLocal(customerModel);
-    
-    // Read back the merged data to ensure local overrides (like local_profile_pic) are applied
+    try {
+      final token = await _getToken();
+      if (token.isNotEmpty) {
+        final customerModel = await remoteDataSource.getClientProfile(token: token);
+        await _saveUserToLocal(customerModel);
+      }
+    } catch (e) {
+      print('Warning: getClientProfile API error ($e). Falling back to cached profile.');
+    }
+
+    // Always attempt to return cached or freshly saved profile
     final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
     if (rawUser != null) {
       Map<String, dynamic> user = {};
@@ -34,8 +38,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final mergedModel = CustomerModel.safeFromJson(user);
       return mergedModel.toEntity();
     }
-    
-    return customerModel.toEntity();
+
+    throw Exception("No profile data found. Please log in again.");
   }
 
   @override
@@ -103,21 +107,30 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   Future<String> _getToken() async {
-    final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
-    if (rawUser != null) {
-      Map<String, dynamic> user = {};
-      if (rawUser is String) {
-        user = json.decode(rawUser);
-      } else if (rawUser is Map) {
-        user = Map<String, dynamic>.from(rawUser);
+    try {
+      final token = await localStorage.load(key: 'token', boxName: 'auth');
+      if (token != null && token.toString().trim().isNotEmpty) {
+        return token.toString().trim();
       }
-      return user['token'] ?? user['mobile_no'] ?? user['id']?.toString() ?? '';
-    }
-    throw Exception("No user found in local storage");
+
+      final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
+      if (rawUser != null) {
+        Map<String, dynamic> user = {};
+        if (rawUser is String) {
+          user = json.decode(rawUser);
+        } else if (rawUser is Map) {
+          user = Map<String, dynamic>.from(rawUser);
+        }
+        final userToken = user['token']?.toString();
+        if (userToken != null && userToken.trim().isNotEmpty) {
+          return userToken.trim();
+        }
+      }
+    } catch (_) {}
+    return '';
   }
 
   Future<void> _saveUserToLocal(dynamic customerModel) async {
-    // Note: To merge with existing token if any, we first get current user
     final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
     Map<String, dynamic> currentUser = {};
     if (rawUser != null) {
@@ -127,18 +140,20 @@ class ProfileRepositoryImpl implements ProfileRepository {
         currentUser = Map<String, dynamic>.from(rawUser);
       }
     }
-    
+
     String? token = customerModel.token;
-    // Merge: preserve token if fresh doesn't have it or is null
     if (token == null && currentUser.containsKey('token')) {
       token = currentUser['token'];
     }
+
+    final siteName = currentUser['site_name'];
 
     await localStorage.save(
       key: 'user',
       value: json.encode({
         'id': customerModel.id,
-        'site_id': customerModel.siteId,
+        'site_id': customerModel.siteId ?? currentUser['site_id'] ?? 0,
+        if (siteName != null) 'site_name': siteName,
         'name': customerModel.name,
         'mobile_no': customerModel.mobileNo,
         'email': customerModel.email,

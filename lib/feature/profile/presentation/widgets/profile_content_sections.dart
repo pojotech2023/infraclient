@@ -186,6 +186,20 @@ class _ProfileContentSectionsState extends State<ProfileContentSections>
                   startDelay: 0.0,
             ),
             const SizedBox(height: 30),
+            _AnimatedMenuSection(
+              title: 'Payments',
+              items: [
+                MenuItem(
+                  icon: Icons.receipt_long_outlined,
+                  title: 'Site Payment History',
+                  subtitle: 'View payments & download receipts',
+                  onTap: () => context.push('/site-payment-history'),
+                ),
+              ],
+              animationController: _staggerController,
+              startDelay: 0.15,
+            ),
+            const SizedBox(height: 30),
                 _AnimatedMenuSection(
               title:  context.l10n?.supportInformation ??'Support & Information',
               items: [

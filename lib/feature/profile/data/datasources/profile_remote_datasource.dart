@@ -37,6 +37,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       uri,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
     );
@@ -53,14 +54,20 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         throw Exception(data['message'] ?? 'Failed to fetch client profile');
       }
     } else {
-      throw Exception('Failed to fetch profile: ${response.statusCode}');
+      String msg = 'Failed to fetch profile (${response.statusCode})';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data.containsKey('message')) {
+          msg = data['message'];
+        }
+      } catch (_) {}
+      throw Exception(msg);
     }
   }
 
   @override
   Future<String> uploadProfilePicture({
-    required int customerId, // keeping customerId if it's still needed by multipart payload, but ideally should use token if possible. wait, I should probably still pass token if the server needs it.
-    // wait, I'll update it later if needed. For now, keep signature or update signature? I'll update signature to require token.
+    required int customerId,
     required String imagePath,
     required String token,
   }) async {
@@ -72,6 +79,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
     final request = http.MultipartRequest('POST', uri);
     request.headers['Authorization'] = 'Bearer $token';
+    request.headers['Accept'] = 'application/json';
     request.fields['customer_id'] = customerId.toString();
     
     request.files.add(
@@ -117,6 +125,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       uri,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': 'Bearer $token',
       },
       body: json.encode(data),

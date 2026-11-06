@@ -103,10 +103,10 @@ CustomButton(
   onPressed: () {
 
      if (_formKey.currentState!.validate()) {
-                            context
-                                .read<LoginBloc>()
-                                .add(LoginWithMobile(mobileController.text));
-                          }
+       context
+           .read<LoginBloc>()
+           .add(LoginWithMobile(mobileController.text.trim()));
+     }
   },
 ),
 

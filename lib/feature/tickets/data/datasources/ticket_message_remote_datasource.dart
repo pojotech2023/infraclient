@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:get_it/get_it.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:http/http.dart' as http;
+import '../../../../core/cache/local_storage.dart';
 import '../models/ticket_message_model.dart';
-import 'dart:convert';
-
 
 abstract class TicketMessageRemoteDataSource {
   Future<List<TicketMessageModel>> getTicketMessages(int ticketId);
@@ -23,13 +23,44 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
 
   TicketMessageRemoteDataSourceImpl({required this.client, required this.baseUrl});
 
+  Future<String?> _getToken() async {
+    try {
+      final localStorage = GetIt.I<LocalStorage>();
+      final token = await localStorage.load(key: 'token', boxName: 'auth');
+      if (token != null && token.toString().trim().isNotEmpty) {
+        return token.toString().trim();
+      }
+      final rawUser = await localStorage.load(key: 'user', boxName: 'auth');
+      if (rawUser != null) {
+        Map<String, dynamic> user = {};
+        if (rawUser is String) {
+          user = json.decode(rawUser);
+        } else if (rawUser is Map) {
+          user = Map<String, dynamic>.from(rawUser);
+        }
+        final userToken = user['token']?.toString();
+        if (userToken != null && userToken.trim().isNotEmpty) {
+          return userToken.trim();
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
   @override
   Future<List<TicketMessageModel>> getTicketMessages(int ticketId) async {
+    final token = await _getToken();
     final url = Uri.parse('$baseUrl/ticket/$ticketId/messages');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+
     print('--- API REQUEST: getTicketMessages ---');
     print('URL: $url');
 
-    final response = await client.get(url);
+    final response = await client.get(url, headers: headers);
 
     print('--- API RESPONSE: getTicketMessages ---');
     print('STATUS: ${response.statusCode}');
@@ -40,7 +71,14 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
       final list = data['data'] as List;
       return list.map((e) => TicketMessageModel.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load messages: ${response.body}');
+      String msg = 'Failed to load messages (${response.statusCode})';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data.containsKey('message')) {
+          msg = data['message'];
+        }
+      } catch (_) {}
+      throw Exception(msg);
     }
   }
 
@@ -52,13 +90,17 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
     required String message,
     File? attachment,
   }) async {
+    final token = await _getToken();
     final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/tickets/messages-store'))
       ..fields['ticket_id'] = ticketId
       ..fields['site_id'] = siteId
       ..fields['sender_type'] = senderType
       ..fields['message'] = message;
 
-  
+    request.headers['Accept'] = 'application/json';
+    if (token != null && token.isNotEmpty) {
+      request.headers['Authorization'] = 'Bearer $token';
+    }
 
     if (attachment != null) {
       final ext = attachment.path.split('.').last.toLowerCase();
@@ -67,7 +109,7 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
       final isPdf = ext == 'pdf';
       final isExcel = ['xls', 'xlsx'].contains(ext);
 
-      final fieldKey = 'attachment'; // ✅ depends on backend
+      final fieldKey = 'attachment';
       MediaType? type;
       if (isImage) {
         type = MediaType('image', ext);
@@ -106,7 +148,14 @@ class TicketMessageRemoteDataSourceImpl implements TicketMessageRemoteDataSource
     print('BODY: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 201) {
-      throw Exception('Failed to send message: ${response.body}');
+      String msg = 'Failed to send message (${response.statusCode})';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data.containsKey('message')) {
+          msg = data['message'];
+        }
+      } catch (_) {}
+      throw Exception(msg);
     }
   }
 }

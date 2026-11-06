@@ -9,6 +9,7 @@ import 'layouts.dart';
 
 class DashboardPage extends StatefulWidget {
   final Widget child;
+  static final ValueNotifier<int> tabNotifier = ValueNotifier<int>(0);
 
   const DashboardPage({super.key, required this.child});
 
@@ -19,48 +20,60 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = <Widget>[
-    const HomeTabPage(),
-     const DrawingTabPage(),
-    const TicketTabPage(),
-    const ProfileTabPage(),
-      
-  ];
+  late final List<Widget> _pages;
 
-  String _titleForIndex(int index) {
-    switch (index) {
-      case 0:
-        return context.l10n?.home ?? 'Home';
-      case 1:
-        return 'Drawings';
-      case 2:
-        return context.l10n?.ticket ?? 'Tickets';
-      case 3:
-        return context.l10n?.profile ?? 'Profile';
-      default:
-        return context.l10n?.dashboard ?? 'Dashboard';
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeTabPage(onSelectTab: _onTabChanged),
+      DrawingTabPage(onSelectTab: _onTabChanged),
+      TicketTabPage(onSelectTab: _onTabChanged),
+      const ProfileTabPage(),
+    ];
+    DashboardPage.tabNotifier.addListener(_onTabNotifierChange);
+  }
+
+  @override
+  void dispose() {
+    DashboardPage.tabNotifier.removeListener(_onTabNotifierChange);
+    super.dispose();
+  }
+
+  void _onTabNotifierChange() {
+    if (mounted) {
+      final newIndex = DashboardPage.tabNotifier.value;
+      if (_currentIndex != newIndex) {
+        setState(() => _currentIndex = newIndex);
+      }
     }
   }
 
+  void _onTabChanged(int index) {
+    if (_currentIndex != index) {
+      setState(() => _currentIndex = index);
+    }
+    if (DashboardPage.tabNotifier.value != index) {
+      DashboardPage.tabNotifier.value = index;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
+    // Only treat it as a child shell route if we're NOT on /dashboard
     final isShellRoute = location != '/dashboard';
 
-    return  DashboardMobile(
-        selectedIndex: _currentIndex,
-        pages: _pages,
-        isShellRoute: isShellRoute,
-        child: widget.child,
-        onTabChanged: (i) {
-          setState(() => _currentIndex = i);
-          if (isShellRoute) context.go('/dashboard');
-        },
-      
+    return DashboardMobile(
+      selectedIndex: _currentIndex,
+      pages: _pages,
+      isShellRoute: isShellRoute,
+      child: widget.child,
+      onTabChanged: (i) {
+        _onTabChanged(i);
+        // If we're in a sub-shell-route, pop back to dashboard
+        if (isShellRoute) context.go('/dashboard');
+      },
     );
   }
-
-  
 }
-
